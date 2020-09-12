@@ -153,7 +153,16 @@ title: Row(
     Text('Feedback')
   ],
 ),
-content: Text('Your AC is consuming more units $unitsConsumedAC Units as compared to a usual 2 Ton AC in $hrsAC hrs and $minsAC mins'),
+content: 
+Column(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+        Text('Your AC is consuming more units $unitsConsumedAC Units as compared to a usual 2 Ton AC in $hrsAC hrs and $minsAC mins'),
+  Text('see recommendations',style: TextStyle(
+    color: Colors.yellow[800]
+  ),)
+  ],
+),
     );
   },
   );
@@ -804,7 +813,7 @@ content: Text('Your AC is consuming more units $unitsConsumedAC Units as compare
                           color: Colors.white,
                           child: Container(
                               width: MediaQuery.of(context).size.width,
-                              // height: MediaQuery.of(context).size.height / 3,
+                
                               child: Padding(
                                 padding:
                                     const EdgeInsets.fromLTRB(8.0, 8, 5, 8),
@@ -844,8 +853,7 @@ content: Text('Your AC is consuming more units $unitsConsumedAC Units as compare
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Row(
-                                                  // mainAxisAlignment:
-                                                  //     MainAxisAlignment.spaceEvenly,
+                                              
                                                   children: [
                                                     Expanded(
                                                       child: Text(
@@ -908,20 +916,7 @@ content: Text('Your AC is consuming more units $unitsConsumedAC Units as compare
                                                             fontSize: 12),
                                                       ),
                                                     ),
-                                                    // limitExceedAC
-                                                    //     ? Icon(
-                                                    //         Icons.error,
-                                                    //         color: Colors.red,
-                                                    //         size: 20,
-                                                    //       )
-                                                    //     : Container(),
-                                                    // limitExceedAC
-                                                    //     ? Text(
-                                                    //         'LIMIT EXCEEDED!',
-                                                    //         style: TextStyle(
-                                                    //             color: Colors.red),
-                                                    //       )
-                                                    //     : Container()
+                                 
                                                   ],
                                                 ),
                                               ],
