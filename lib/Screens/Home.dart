@@ -39,7 +39,7 @@ class _HomeState extends State<Home> {
               onTap: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (BuildContext context) {
-                  return Applainces();
+                  return Applainces(roomNum: index==0?1:2,);
                 }));
               },
               child: Padding(

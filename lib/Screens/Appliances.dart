@@ -9,6 +9,8 @@ import 'package:smart_grid/Global.dart';
 import 'package:smart_grid/Screens/Login.dart';
 
 class Applainces extends StatefulWidget {
+  final int roomNum;
+  Applainces({@required this.roomNum,Key key}):super(key:key);
   @override
   _ApplaincesState createState() => _ApplaincesState();
 }
@@ -29,6 +31,7 @@ class _ApplaincesState extends State<Applainces> {
   double unitsConsumedAC = 0;
   double unitsConsumedApp2 = 0;
   double totalroomUnits = 0;
+  double roomLimit=0;
   bool limitExceedAC = false;
   bool limitExceedApp2 = false;
   int minsApp2 = 0;
@@ -89,7 +92,7 @@ class _ApplaincesState extends State<Applainces> {
     double powerperMin;
     _timerApp2 = Timer.periodic(Duration(seconds: 5), (timer) {
       powerperMin = (power / 1000) / 60;
-      n = (totalpowerAC + powerperMin);
+      n = (totalpowerApp2 + powerperMin);
 
       if (this.mounted) {
         if (minsApp2 == 59) {
@@ -124,17 +127,37 @@ class _ApplaincesState extends State<Applainces> {
     });
   }
    void _starttimerRoom() {
-  
+  int count=0;
     _timerAC = Timer.periodic(Duration(seconds: 5), (timer) {
         if (this.mounted) {
       print('total room units : $totalroomUnits');
     setState(() {
       totalroomUnits=num.parse((unitsConsumedAC+unitsConsumedApp2).toStringAsFixed(2));
     });
+    if(totalroomUnits>roomLimit&&(recordAC==true||recordApp2==true)){
+    count++;
+    }
+    if(count==1)
+    feedbackdialog();
         }
     });
   }
-
+feedbackdialog(){
+  return showDialog(context: context,
+  builder: (context) {
+    return AlertDialog(
+title: Row(
+  children: [
+    Icon(Icons.info,color: Colors.yellow[800],),
+    SizedBox(width:5,),
+    Text('Feedback')
+  ],
+),
+content: Text('Your AC is consuming more units $unitsConsumedAC Units as compared to a usual 2 Ton AC in $hrsAC hrs and $minsAC mins'),
+    );
+  },
+  );
+}
 
   void _canceltimerWM() {
     _timerApp2.cancel();
@@ -227,6 +250,7 @@ class _ApplaincesState extends State<Applainces> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text(
@@ -322,7 +346,8 @@ class _ApplaincesState extends State<Applainces> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
+                  SizedBox(    height: 60,),
+                widget.roomNum==1?  Card(
                     color: limitExceedAC ? Colors.red[100] : Colors.white,
                     child: Container(
                         width: MediaQuery.of(context).size.width,
@@ -464,9 +489,9 @@ class _ApplaincesState extends State<Applainces> {
                             ],
                           ),
                         )),
-                  ),
+                  ):Container(),
 //Appliance 2
-                  Card(
+             widget.roomNum==1?     Card(
                     color: limitExceedApp2 ? Colors.red[100] : Colors.white,
                     child: Container(
                         width: MediaQuery.of(context).size.width,
@@ -608,8 +633,169 @@ class _ApplaincesState extends State<Applainces> {
                             ],
                           ),
                         )),
-                  ),
-                  ListView.builder(
+                  ):Container(),
+               addApplianceWidget(),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                // width: MediaQuery.of(context).size.width/1.7,
+                alignment: Alignment.center,
+                height: 60,
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(color: Colors.blueAccent),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Total Room Consumption:',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      ' $totalroomUnits Units',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+             Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                // width: MediaQuery.of(context).size.width/1.7,
+                alignment: Alignment.center,
+                height: 60,
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(color: Colors.blueGrey),
+                child: Row(
+                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                      'Room Limit: ${roomLimit.toString()} Units',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    RaisedButton(onPressed: (){
+                      enterlimitForRoom();
+                    },child: Text('Set limit'),)
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  enterlimitWashMachine() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Enter a limit for the appliance'),
+          content: TextField(
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              suffix: Text('Units'),
+            ),
+            onChanged: (val) {
+              setState(() {
+                limitUnitsApp2 = double.parse(val);
+              });
+            },
+          ),
+          actions: [
+            FlatButton(
+                onPressed: () {
+                  setState(() {
+                    // noOfRooms = noOfRooms + noOfRoomsAdd;
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text('Set'))
+          ],
+        );
+      },
+    );
+  }
+
+  enterlimit() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Enter a limit for the appliance'),
+          content: TextField(
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              suffix: Text('Units'),
+            ),
+            onChanged: (val) {
+              setState(() {
+                limitUnitsAC = double.parse(val);
+              });
+            },
+          ),
+          actions: [
+            FlatButton(
+                onPressed: () {
+                  setState(() {
+                    // noOfRooms = noOfRooms + noOfRoomsAdd;
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text('Set'))
+          ],
+        );
+      },
+    );
+  }
+    enterlimitForRoom() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Enter a limit for Room'),
+          content: TextField(
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              suffix: Text('Units'),
+            ),
+            onChanged: (val) {
+              setState(() {
+                roomLimit = double.parse(val);
+              });
+            },
+          ),
+          actions: [
+            FlatButton(
+                onPressed: () {
+                  setState(() {
+                    // noOfRooms = noOfRooms + noOfRoomsAdd;
+                  });
+                  Navigator.pop(context);
+                },
+                child: Text('Set'))
+          ],
+        );
+      },
+    );
+  }
+  Widget addApplianceWidget(){
+    return    ListView.builder(
                       shrinkWrap: true,
                       primary: false,
                       itemCount: roomapp.length,
@@ -748,107 +934,6 @@ class _ApplaincesState extends State<Applainces> {
                                 ),
                               )),
                         );
-                      })
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                // width: MediaQuery.of(context).size.width/1.7,
-                alignment: Alignment.center,
-                height: 60,
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.blueAccent),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Total Room Consumption:',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      ' $totalroomUnits Units',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  enterlimitWashMachine() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Enter a limit for the appliance'),
-          content: TextField(
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              suffix: Text('Units'),
-            ),
-            onChanged: (val) {
-              setState(() {
-                limitUnitsApp2 = double.parse(val);
-              });
-            },
-          ),
-          actions: [
-            FlatButton(
-                onPressed: () {
-                  setState(() {
-                    // noOfRooms = noOfRooms + noOfRoomsAdd;
-                  });
-                  Navigator.pop(context);
-                },
-                child: Text('Set'))
-          ],
-        );
-      },
-    );
-  }
-
-  enterlimit() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Enter a limit for the appliance'),
-          content: TextField(
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              suffix: Text('Units'),
-            ),
-            onChanged: (val) {
-              setState(() {
-                limitUnitsAC = double.parse(val);
-              });
-            },
-          ),
-          actions: [
-            FlatButton(
-                onPressed: () {
-                  setState(() {
-                    // noOfRooms = noOfRooms + noOfRoomsAdd;
-                  });
-                  Navigator.pop(context);
-                },
-                child: Text('Set'))
-          ],
-        );
-      },
-    );
+                      });
   }
 }
